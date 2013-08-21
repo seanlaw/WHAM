@@ -5,7 +5,7 @@
 WHAM::WHAM (){
   cmd.clear();
   Fguess.clear();
-  Finv.clear();
+  F.clear();
   expBVE.clear();
 	expBVxEx.clear();
   nWindow=0;
@@ -19,6 +19,9 @@ WHAM::WHAM (){
   B0=1.0/(kB*1E-6);
   factor=1.0;
   factorFlag=false;
+  denomInv.clear();
+  pdSum.clear();
+  Pun.clear();
 }
 
 void WHAM::appendCmd(const std::string &str){
@@ -254,7 +257,7 @@ void WHAM::processEnergies(){
 }
 
 
-void WHAM::processCoor (){
+bool WHAM::processCoor (){
   unsigned int j;
   unsigned int k;
   std::string line;
@@ -292,7 +295,7 @@ void WHAM::processCoor (){
       } 
       if (s.size() == nDim){
         if (nDim > 1){
-          std::cerr << "Warning: WHAM can only handle 1-D PMFs" << std::endl;
+          //std::cerr << "Warning: WHAM can only handle 1-D PMFs" << std::endl;
         }
         rCoor->appendData(s, j);
         k++;
@@ -311,10 +314,22 @@ void WHAM::processCoor (){
   }
 
   rCoor->setBins(this->getBins());
-  rCoor->genHISTOGRAM(true);
-  rCoor->printHISTOGRAM();
 
   std::cerr << std::endl;
+
+  //Compare data size from reaction coordinate and expBVE
+  if (expBVE.size() != rCoor->getNFile()){
+    return false;
+  }
+  else{
+    for (j=0; j< this->getNWindow(); j++){
+      if (expBVE.at(j).size() != rCoor->getNData(j)){
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 bool WHAM::iterateWHAM (){
@@ -322,8 +337,7 @@ bool WHAM::iterateWHAM (){
   unsigned int niter;
   std::vector<double> nFlast; //n(i)*exp(Bf(i))
   std::vector<double> FnextInv; //exp(-Bf(i)) = 1.0/[exp(Bf(i))]
-  std::vector< std::vector<double> > denomInv;
-  bool breakFlag;
+  bool convergedFlag;
   double fnext; //Temporary variable
   double flast; //Temporary variable
   double FnextInvZero; //Temporary variable
@@ -350,7 +364,7 @@ bool WHAM::iterateWHAM (){
     return true;
   }
 
-  Finv.resize(this->getNWindow());
+  F.resize(this->getNWindow());
   nFlast.resize(this->getNWindow()); //n(j)*F(j)
   FnextInv.resize(this->getNWindow());
   denomInv.resize(this->getNWindow());
@@ -392,8 +406,8 @@ bool WHAM::iterateWHAM (){
       }
     }
 
-    //Check tolerance (note that tolerance is in f but F is in exp(f))
-    breakFlag=true;
+    //Check tolerance (note that tolerance is in f but F is in exp(Bf))
+    convergedFlag=true;
     FnextInvZero=FnextInv.at(0); //Need this as FnextInv(0) gets shifted first
     for (i=0; i< this->getNWindow(); i++){
       //Shift FnextInv(i) relative to FnextInv(0)
@@ -402,7 +416,7 @@ bool WHAM::iterateWHAM (){
       flast=log(nFlast.at(i)/expBVE.at(i).size())/B.at(i); //Positive Beta
       df=fabs(fnext-flast);
       if (df >= tol){
-        breakFlag=false;
+        convergedFlag=false;
       }
     }
 
@@ -411,20 +425,25 @@ bool WHAM::iterateWHAM (){
       nFlast.at(i)=expBVE.at(i).size()*(1.0/FnextInv.at(i)); //n(i)*F(i)
     }
 
-    if (breakFlag == true){
+    if (convergedFlag == true){
+      std::cout << "# Iteration = " << niter << std::endl;
       for (i=0; i< this->getNWindow(); i++){
-        //Final exp(-B(i)*f(i))
-        Finv.at(i)=log(nFlast.at(i)/expBVE.at(i).size())/B.at(i);
-        std::cerr << "# f( " << i+1 << " ) = " << Finv.at(i) << std::endl;
+        //Final exp(B(i)*f(i))
+        F.at(i)=nFlast.at(i)/expBVE.at(i).size();
+        flast=log(nFlast.at(i)/expBVE.at(i).size())/B.at(i);
+        std::cout << "# f( " << i+1 << " ) = " << flast << std::endl;
       }
       break;
     }
     if (niter % 10 == 0){
-      std::cerr << "Iteration " << niter << std::endl;
+      std::cerr << "# Iteration = " << niter << std::endl;
       for (i=0; i< this->getNWindow(); i++){
         flast=log(nFlast.at(i)/expBVE.at(i).size())/B.at(i);
         std::cerr << "# f( " << i+1 << " ) = " << flast << std::endl;
       }
+    }
+    else{
+      std::cerr << "# Iteration = " << niter << std::endl;
     }
   }
   
@@ -556,6 +575,123 @@ void WHAM::setNWindow(const int &nwin){
   nWindow=static_cast<unsigned int>(nwin);
 }
 
+void WHAM::setFguess(const std::string &fin){
+  //Convert f(i) to Fguess(i)
+  std::string line;
+  std::vector<std::string> s;
+  std::ifstream guessFile;
+  std::istream *guessinp;
+  double f;
+  unsigned int j;
+  unsigned int nline;
+
+  line.clear();
+  s.clear();
+  guessinp=NULL;
+  j=0;
+  nline=0;
+
+  Fguess.clear();
+  F.clear();
+
+  guessFile.open(fin.c_str(), std::ios::in);
+  guessinp=&guessFile;
+  while (guessinp->good() && !(guessinp->eof()) && j < this->getNWindow()){
+    getline(*guessinp, line);
+    Misc::splitStr(line, " \t", s, false);
+    if (line.length() == 0){
+      getline(*guessinp, line);
+      if (guessinp->eof()){
+        continue;
+      }
+      else{
+        std::cerr << "Error: Found blank line (" << nline+1 << ") in file \"" << fin << "\"" << std::endl;
+        break;
+      }
+    }
+    if (Misc::isdouble(s.back())){
+      std::stringstream(s.back()) >> f;
+      Fguess.push_back(exp(B.at(j)*f)); //Fguess(i)=exp(B*f(i))
+      j++;
+    }
+    nline++;
+  }
+  if(guessFile.is_open()){
+    guessFile.close();
+  }
+}
+
+void WHAM::setFval(const std::string &fin){
+  //Convert f(i) to Fguess(i)
+  std::string line;
+  std::vector<std::string> s;
+  std::ifstream fFile;
+  std::istream *finp;
+  double f;
+  unsigned int j;
+  unsigned int nline;
+
+  line.clear();
+  s.clear();
+  finp=NULL;
+  j=0;
+  nline=0;
+
+  Fguess.clear();
+  F.clear();
+
+  fFile.open(fin.c_str(), std::ios::in);
+  finp=&fFile;
+  while (finp->good() && !(finp->eof()) && j < this->getNWindow()){
+    getline(*finp, line);
+    Misc::splitStr(line, " \t", s, false);
+    if (line.length() == 0){
+      getline(*finp, line);
+      if (finp->eof()){
+        continue;
+      }
+      else{
+        std::cerr << "Error: Found blank line (" << nline+1 << ") in file \"" << fin << "\"" << std::endl;
+        break;
+      }
+    }
+    if (Misc::isdouble(s.back())){
+      std::stringstream(s.back()) >> f;
+      F.push_back(exp(B.at(j)*f)); //Final F(i)=exp(B*f(i))
+      j++;
+    }
+    nline++;
+  }
+  while (F.size() < this->getNWindow()){
+    F.push_back(1);
+    std::cerr << "Warning: Missing f( "<< F.size() << " ) value was replaced with default (0)" << std::endl;
+  }
+  if(fFile.is_open()){
+    fFile.close();
+  }
+}
+
+void WHAM::setDenomInv(){
+  unsigned int j;
+  unsigned int k;
+  unsigned int l;
+   
+  denomInv.resize(this->getNWindow());
+ 
+  for (j=0; j< this->getNWindow(); j++){ //For each simulation J
+    denomInv.at(j).resize(expBVE.at(j).size());
+    for (k=0; k< expBVE.at(j).size(); k++){ //Foreach datapoint K in simulation J
+      denomInv.at(j).at(k)=0.0;
+      for (l=0; l< this->getNWindow(); l++){ //Foreach simulation environment L
+        //Calculate denom
+        denomInv.at(j).at(k)+=expBVE.at(j).size()*(F.at(l))*expBVE.at(j).at(k).at(l);
+      }
+      denomInv.at(j).at(k)=1.0/denomInv.at(j).at(k);
+    }
+  }
+
+}
+
 std::string WHAM::getMeta(){
   return fMeta;
 }
@@ -578,4 +714,64 @@ unsigned int WHAM::getNWindow(){
 
 std::vector<unsigned int> WHAM::getBins(){
   return bins;
+}
+
+void WHAM::binOnTheFly(){
+  unsigned int b;
+  std::map<unsigned int, double>::iterator it;
+  double norm;
+
+  norm=0.0;
+
+  for (unsigned int j=0; j< this->getNWindow(); j++){
+    for (unsigned int k=0; k < expBVE.at(j).size(); k++){
+      //Note that we are using an std::map for storing the sparse Punbiased
+      b=rCoor->getBin(j, k);
+      if (expBVxEx.size() != expBVE.size()){
+        //Traditional WHAM
+        if (Pun.find(b) != Pun.end()){
+          Pun[b]+=expBVE.at(j).at(k).at(j)*denomInv.at(j).at(k);
+        }
+        else{
+          Pun[b]=expBVE.at(j).at(k).at(j)*denomInv.at(j).at(k);
+        }
+      }
+      else{
+        //WHAM Extrapolation
+        if (Pun.find(b) != Pun.end()){
+          Pun[b]+=expBVxEx.at(j).at(k).at(j)*denomInv.at(j).at(k);
+        }
+        else{
+          Pun[b]=expBVxEx.at(j).at(k).at(j)*denomInv.at(j).at(k);
+        }
+      }
+    }
+  }
+
+  for (it=Pun.begin(); it != Pun.end(); it++){
+    norm+=it->second;
+  }
+
+  for (it=Pun.begin(); it != Pun.end(); it++){
+    it->second=it->second/norm;
+  }
+}
+
+void WHAM::printPMF(){
+  //Note that Pun has map keys that are already in sorted order
+  std::map<unsigned int, double>::iterator it;
+  std::vector<double> coor;
+  unsigned int i;
+  double T;
+
+  T=1.0/(B0*kB);
+
+  for (it=Pun.begin(); it != Pun.end(); it++){
+    coor=rCoor->getBinCoor(it->first);
+    for (i=0; i< coor.size(); i++){
+      std::cout << coor.at(i) << "   ";
+    }
+    std::cout << -kB*T*log(it->second) << "   ";
+    std::cout << it->second << std::endl;
+  }
 }

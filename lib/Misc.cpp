@@ -13,11 +13,13 @@ std::string Misc::single (const std::string &resnamein){
 void Misc::splitStr (const std::string &str, const std::string &delim, std::vector<std::string> &out, const bool repeat){
   size_t p0=0;
   size_t p1=std::string::npos;
+  size_t plast=std::string::npos;
 	out.clear();
 
   //"repeat" = true means that a blank string is added when there are
   //back-to-back delimiters. Otherwise, repeat=false ignores back-to-back delimiters.
 
+  plast=str.find_last_not_of(delim);
   p1=str.find_first_of(delim,p0);
 
   while (p1 != std::string::npos){
@@ -33,7 +35,7 @@ void Misc::splitStr (const std::string &str, const std::string &delim, std::vect
     p1=str.find_first_of(delim, p0);
   }
   //After last delimiter
-  if (p1-p0 > 0){ //Do NOT add "&& p1 != std::string::npos"
+  if (plast != std::string::npos && plast >= p0 ){
     out.push_back(str.substr(p0,p1-p0));
   }
   else{
@@ -41,7 +43,7 @@ void Misc::splitStr (const std::string &str, const std::string &delim, std::vect
       out.push_back(str.substr(p0,p1-p0));
     }
   }
-
+  //std::cerr << out.size() << std::endl;
 }
 
 template <class SplitVec>
@@ -50,11 +52,13 @@ void Misc::splitNum (const std::string &str, const std::string &delim, SplitVec 
 	out.reserve(500); //Still need resizing but reduces moving of data in memory
   size_t p0=0;
   size_t p1=std::string::npos;
+  size_t plast=std::string::npos;
 	int n=0;
 
   //"repeat" = true means that a blank string is added when there are
   //back-to-back delimiters. Otherwise, repeat=false ignores back-to-back delimiters.
 
+  plast=str.find_last_not_of(delim);
   p1=str.find_first_of(delim,p0);
 
   while (p1 != std::string::npos){
@@ -74,7 +78,7 @@ void Misc::splitNum (const std::string &str, const std::string &delim, SplitVec 
     p1=str.find_first_of(delim, p0);
   }
   //After last delimiter
-  if (p1-p0 > 0){ //Do NOT add "&& p1 != std::string::npos"
+  if (plast != std::string::npos && plast >= p0){
 		out.resize(n+1);
 		std::stringstream(str.substr(p0,p1-p0)) >> out.at(n);
 		n++;
@@ -86,6 +90,7 @@ void Misc::splitNum (const std::string &str, const std::string &delim, SplitVec 
 			n++;
     }
   }
+  //std::cerr << out.size() << std::endl;
 }
 
 template void Misc::splitNum<std::vector<int> > (const std::string&, const std::string&, std::vector<int>&, const bool);
@@ -107,7 +112,9 @@ bool Misc::isdouble (const std::string &str){
   for (unsigned int i=0; i< str.size(); i++){
     switch (str[i]){
       case '-': negPos=i;
+        continue;
       case '.': nDecimals++;
+        continue;
       case '0':
       case '1':
       case '2':

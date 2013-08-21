@@ -9,14 +9,15 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
-#include <stdexcept>
+#include <map>
 
 class WHAM {
   private:
     std::string cmd;
     std::vector<double> Fguess;
-    std::vector<double> Finv; //Final exp(-B(i)*f(i))
+    std::vector<double> F; //Final exp(B(i)*f(i))
     std::vector< std::vector< std::vector<double> > > expBVE; //Is dynamic and can be jagged
 		std::vector< std::vector< std::vector<double> > > expBVxEx; //Is dynamic and can be jagged
     unsigned int nWindow;
@@ -30,6 +31,9 @@ class WHAM {
     bool factorFlag;
     double factor; //For use with Molecular Transfer Model (MTM)
     std::vector< std::vector<std::string> > inps;
+    std::vector< std::vector<double> > denomInv; //Inverse denominator for WHAM calculation
+    std::vector< std::vector<double> > pdSum; //Partial Derivative for accelerated WHAM
+    std::map<unsigned int, double> Pun; //Unbiased probabilities
     Histogram *rCoor; //Reaction coordinates
 
   public:
@@ -40,7 +44,7 @@ class WHAM {
     void processMetadata(const std::string &metatype);
     void processEnergies(); 
     bool iterateWHAM();
-    void processCoor(); //Reaction coord
+    bool processCoor(); //Reaction coord
     void fixTemp();
 
     void setMeta(const std::string &metain);
@@ -55,6 +59,9 @@ class WHAM {
     void setFactor(const double &factorin);
     void setNWindow(const unsigned int &nwin);
     void setNWindow(const int &nwin);
+    void setFguess(const std::string &fin);
+    void setFval(const std::string &fin);
+    void setDenomInv();
 
     std::string getMeta();
     unsigned int getTempSize();
@@ -62,6 +69,8 @@ class WHAM {
     std::string getCmd();
     unsigned int getNWindow();
     std::vector<unsigned int> getBins();
+    void binOnTheFly();
+    void printPMF();
 };
 
 #endif
