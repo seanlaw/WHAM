@@ -253,7 +253,6 @@ void WHAM::processEnergies(){
     }
   }
   std::cerr << std::endl;
-
 }
 
 
@@ -333,7 +332,7 @@ bool WHAM::processCoor (){
 }
 
 bool WHAM::iterateWHAM (){
-  unsigned int i,j,k,l;
+  unsigned int i,j,k,l,a;
   unsigned int niter;
   std::vector<double> nFlast; //n(i)*exp(Bf(i))
   std::vector<double> FnextInv; //exp(-Bf(i)) = 1.0/[exp(Bf(i))]
@@ -342,6 +341,9 @@ bool WHAM::iterateWHAM (){
   double flast; //Temporary variable
   double FnextInvZero; //Temporary variable
   double df; //fabs(f(i,next) - f(i,last))
+	time_t start;
+	double stop;
+	double fraction;
  
   // WHAM Formalism (Adapted from Michael Andrec)
   //
@@ -368,6 +370,7 @@ bool WHAM::iterateWHAM (){
   nFlast.resize(this->getNWindow()); //n(j)*F(j)
   FnextInv.resize(this->getNWindow());
   denomInv.resize(this->getNWindow());
+	pdSum.resize(this->getNWindow());
 
   for (j=0; j< this->getNWindow(); j++){
     //Initialize F
@@ -377,34 +380,52 @@ bool WHAM::iterateWHAM (){
     }
     
     denomInv.at(j).resize(expBVE.at(j).size());
+		pdSum.at(j).resize(this->getNWindow());
   }
 
   //WHAM Iterations
+	time(&start);
   for (niter=1; niter< maxIter; niter++){
-    for (i=0; i< this->getNWindow(); i++){ //For each F value I (simulation environment)
+		for (i=0; i< this->getNWindow(); i++){
 			FnextInv.at(i)=0.0;
-      for (j=0; j< this->getNWindow(); j++){ //For each simulation J
-        for (k=0; k< expBVE.at(j).size(); k++){ //Foreach datapoint K in simulation J
-          if (i==0){ //Calculate (redundant) denominator once for each iteration
-						denomInv.at(j).at(k)=0.0;
-            for (l=0; l< this->getNWindow(); l++){ //Foreach simulation environment L
-              //Calculate denom
-              denomInv.at(j).at(k)+=nFlast.at(l)*expBVE.at(j).at(k).at(l);
-            }
-            denomInv.at(j).at(k)=1.0/denomInv.at(j).at(k);
-          }
+			for (a=0; a< this->getNWindow(); a++){
+				pdSum.at(i).at(a)=0.0;
+			}
+		}
+		
+    for (j=0; j< this->getNWindow(); j++){ //For each simulation J
+      for (k=0; k< expBVE.at(j).size(); k++){ //Foreach datapoint K in simulation J
+       	//Calculate (redundant) denominator once for each iteration
+				denomInv.at(j).at(k)=0.0;
+        for (l=0; l< this->getNWindow(); l++){ //Foreach simulation environment L
+          //Calculate denom
+          denomInv.at(j).at(k)+=nFlast.at(l)*expBVE.at(j).at(k).at(l);
+        }
+        denomInv.at(j).at(k)=1.0/denomInv.at(j).at(k);
+				for (i=0; i< this->getNWindow(); i++){ //For each F value I (simulation environment)
 					if (expBVxEx.size() == expBVE.size()){ //WHAM Extrapolation
-						FnextInv.at(i)+=expBVxEx.at(j).at(k).at(i)*denomInv.at(j).at(k);
+						fraction=expBVxEx.at(j).at(k).at(i)*denomInv.at(j).at(k);
+						FnextInv.at(i)+=fraction;
+						/*
+						fraction*=denomInv.at(j).at(k);
+						for (a=0; a< this->getNWindow(); a++){
+	            pdSum.at(i).at(a)+=expBVxEx.at(j).at(k).at(a)*fraction;
+	          }
+						*/
 					} 
 					else{ //Traditional WHAM
-          	FnextInv.at(i)+=expBVE.at(j).at(k).at(i)*denomInv.at(j).at(k);
+						fraction=expBVE.at(j).at(k).at(i)*denomInv.at(j).at(k);
+         		FnextInv.at(i)+=fraction;
+						/*
+						fraction*=denomInv.at(j).at(k);
+						for (a=0; a< this->getNWindow(); a++){
+							pdSum.at(i).at(a)+=expBVE.at(j).at(k).at(a)*fraction;
+						}	
+						*/
 					}
-        }
+				}
       }
-      if (factorFlag == true){ //For use with Molecular Transfer Model (MTM)
-        FnextInv.at(i)*=factor;
-      }
-    }
+   	}
 
     //Check tolerance (note that tolerance is in f but F is in exp(Bf))
     convergedFlag=true;
@@ -426,7 +447,8 @@ bool WHAM::iterateWHAM (){
     }
 
     if (convergedFlag == true){
-      std::cout << "# Iteration = " << niter << std::endl;
+			stop=difftime(time(0), start);
+      std::cout << "# Iteration = " << niter << " , Time = " << stop << " seconds " << std::endl;
       for (i=0; i< this->getNWindow(); i++){
         //Final exp(B(i)*f(i))
         F.at(i)=nFlast.at(i)/expBVE.at(i).size();
@@ -675,16 +697,18 @@ void WHAM::setDenomInv(){
   unsigned int j;
   unsigned int k;
   unsigned int l;
-   
+  
+	denomInv.clear();
   denomInv.resize(this->getNWindow());
  
   for (j=0; j< this->getNWindow(); j++){ //For each simulation J
     denomInv.at(j).resize(expBVE.at(j).size());
     for (k=0; k< expBVE.at(j).size(); k++){ //Foreach datapoint K in simulation J
+			
       denomInv.at(j).at(k)=0.0;
       for (l=0; l< this->getNWindow(); l++){ //Foreach simulation environment L
         //Calculate denom
-        denomInv.at(j).at(k)+=expBVE.at(j).size()*(F.at(l))*expBVE.at(j).at(k).at(l);
+				denomInv.at(j).at(k)+=expBVE.at(j).size()*F.at(l)*expBVE.at(j).at(k).at(l);
       }
       denomInv.at(j).at(k)=1.0/denomInv.at(j).at(k);
     }
@@ -722,6 +746,25 @@ void WHAM::binOnTheFly(){
   double norm;
 
   norm=0.0;
+	Pun.clear();
+
+	//From Souaille & Roux, 2001
+	//
+	//				                                        
+	// Pun = 
+	//		                                                            N(j)
+	// SUM(j=1,....,S) SUM(k=1,...,N(j)----------------------------------------------------------------------- Pb(j)
+	//                                    SUM(l=1,...,S) N(l)*F(l)*exp(-B(l)V(l,jk))*exp[-(B(l)-B(0))E(l,jk)]
+	//
+	// But N(j)*Pb(j) = N(j)*[counts/N(j)] = Biased Histogram Counts, so
+	//
+	// Pun =
+	//                                                           Biased Histogram Counts
+	// SUM(j=1,....,S) SUM(k=1,...,N(j)-----------------------------------------------------------------------
+	//                                    SUM(l=1,...,S) N(l)*F(l)*exp(-B(l)V(l,jk))*exp[-(B(l)-B(0))E(l,jk)]
+	//
+	// Note that one needs to re-weight each biased histogram count(jk) by expBVxEx(j,jk) when doing WHAM extrapolation!
+	//
 
   for (unsigned int j=0; j< this->getNWindow(); j++){
     for (unsigned int k=0; k < expBVE.at(j).size(); k++){
@@ -729,15 +772,17 @@ void WHAM::binOnTheFly(){
       b=rCoor->getBin(j, k);
       if (expBVxEx.size() != expBVE.size()){
         //Traditional WHAM
+				//The numerator is simply the biased histogram count
         if (Pun.find(b) != Pun.end()){
-          Pun[b]+=expBVE.at(j).at(k).at(j)*denomInv.at(j).at(k);
+					Pun[b]+=denomInv.at(j).at(k);
         }
         else{
-          Pun[b]=expBVE.at(j).at(k).at(j)*denomInv.at(j).at(k);
+					Pun[b]=denomInv.at(j).at(k);
         }
       }
       else{
         //WHAM Extrapolation
+				//The numerator is the biased histogram count re-weighted by expBVxEx for that datapoint
         if (Pun.find(b) != Pun.end()){
           Pun[b]+=expBVxEx.at(j).at(k).at(j)*denomInv.at(j).at(k);
         }

@@ -12,6 +12,7 @@
 #include <sstream>
 #include <vector>
 #include <map>
+#include <ctime>
 
 class WHAM {
   private:
