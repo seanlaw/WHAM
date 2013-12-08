@@ -12,6 +12,7 @@
 #include <sstream>
 #include <vector>
 #include <map>
+#include <limits>
 #include <ctime>
 
 class WHAM {
@@ -33,7 +34,6 @@ class WHAM {
     double factor; //For use with Molecular Transfer Model (MTM)
     std::vector< std::vector<std::string> > inps;
     std::vector< std::vector<double> > denomInv; //Inverse denominator for WHAM calculation
-    std::vector< std::vector<double> > pdSum; //Partial Derivative for accelerated WHAM
     std::map<unsigned int, double> Pun; //Unbiased probabilities
     Histogram *rCoor; //Reaction coordinates
 
@@ -41,7 +41,7 @@ class WHAM {
     WHAM ();
     void appendCmd(const std::string &str);
     void genWHAMInput();
-    void readMetadata();
+    unsigned int readMetadata();
     void processMetadata(const std::string &metatype);
     void processEnergies(); 
     bool iterateWHAM();

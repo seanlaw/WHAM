@@ -20,7 +20,6 @@ WHAM::WHAM (){
   factor=1.0;
   factorFlag=false;
   denomInv.clear();
-  pdSum.clear();
   Pun.clear();
 }
 
@@ -32,7 +31,7 @@ void WHAM::genWHAMInput(){
 
 }
 
-void WHAM::readMetadata(){
+unsigned int WHAM::readMetadata(){
   std::string line;
   std::vector<std::string> s;
   std::ifstream metaFile;
@@ -48,7 +47,7 @@ void WHAM::readMetadata(){
   while (metainp->good() && !(metainp->eof())){
     getline(*metainp, line);
     Misc::splitStr(line, " \t", s, false);
-    if (s.size() == 3 && (s.at(0) != "!" || s.at(0) != "#")){
+    if (s.size() == 3 && (s.at(0).compare("!") != 0 || s.at(0).compare("#") != 0)){
       inps.resize(this->getNWindow()+1);
       inps.at(this->getNWindow())=s;
       this->setNWindow(this->getNWindow()+1);
@@ -59,7 +58,11 @@ void WHAM::readMetadata(){
     metaFile.close();
   }
 
-  this->fixTemp(); //Ensure the number of windows and temperatures match, assign B0 
+  if (this->getNWindow() > 0){
+    this->fixTemp(); //Ensure the number of windows and temperatures match, assign B0 
+  }
+
+  return this->getNWindow();
 }
 
 void WHAM::processEnergies(){
@@ -141,8 +144,10 @@ void WHAM::processEnergies(){
             expBVE.at(j).at(k).resize(this->getNWindow());
             expBVxEx.at(j).at(k).resize(this->getNWindow());
             for (i=0; i< this->getNWindow(); i++){
-              expBVE.at(j).at(k).at(i)=exp(-B.at(i)*v.at(i)) * exp(-(B.at(i)-B0)*e.at(0));                                                  
-              expBVxEx.at(j).at(k).at(i)=exp(-B.at(i)*v.at(i+this->getNWindow())) * exp(-(B.at(i)-B0)*e.at(0));
+							//V = Vbias
+              expBVE.at(j).at(k).at(i)=exp(-B.at(i)*v.at(i)) * exp(-(B.at(i)-B0)*e.at(0));
+							//Vx = Vbias + Vextrapolation
+              expBVxEx.at(j).at(k).at(i)=exp(-B.at(i)*(v.at(i)+v.at(i+this->getNWindow()))) * exp(-(B.at(i)-B0)*e.at(0));
             }
           }
           else{
@@ -196,8 +201,10 @@ void WHAM::processEnergies(){
           expBVE.at(j).at(k).resize(this->getNWindow());
           expBVxEx.at(j).at(k).resize(this->getNWindow());
           for (i=0; i< this->getNWindow(); i++){
+						//V = Vbias
             expBVE.at(j).at(k).at(i)=exp(-B.at(i)*v.at(i));
-            expBVxEx.at(j).at(k).at(i)=exp(-B.at(i)*v.at(i+this->getNWindow()));
+						//Vx = Vbias + Vextrapolation
+            expBVxEx.at(j).at(k).at(i)=exp(-B.at(i)*(v.at(i)+v.at(i+this->getNWindow())));
           }
         }
         else{
@@ -332,7 +339,7 @@ bool WHAM::processCoor (){
 }
 
 bool WHAM::iterateWHAM (){
-  unsigned int i,j,k,l,a;
+  unsigned int i,j,k,l;
   unsigned int niter;
   std::vector<double> nFlast; //n(i)*exp(Bf(i))
   std::vector<double> FnextInv; //exp(-Bf(i)) = 1.0/[exp(Bf(i))]
@@ -343,7 +350,6 @@ bool WHAM::iterateWHAM (){
   double df; //fabs(f(i,next) - f(i,last))
 	time_t start;
 	double stop;
-	double fraction;
  
   // WHAM Formalism (Adapted from Michael Andrec)
   //
@@ -370,7 +376,6 @@ bool WHAM::iterateWHAM (){
   nFlast.resize(this->getNWindow()); //n(j)*F(j)
   FnextInv.resize(this->getNWindow());
   denomInv.resize(this->getNWindow());
-	pdSum.resize(this->getNWindow());
 
   for (j=0; j< this->getNWindow(); j++){
     //Initialize F
@@ -380,7 +385,6 @@ bool WHAM::iterateWHAM (){
     }
     
     denomInv.at(j).resize(expBVE.at(j).size());
-		pdSum.at(j).resize(this->getNWindow());
   }
 
   //WHAM Iterations
@@ -388,9 +392,6 @@ bool WHAM::iterateWHAM (){
   for (niter=1; niter< maxIter; niter++){
 		for (i=0; i< this->getNWindow(); i++){
 			FnextInv.at(i)=0.0;
-			for (a=0; a< this->getNWindow(); a++){
-				pdSum.at(i).at(a)=0.0;
-			}
 		}
 		
     for (j=0; j< this->getNWindow(); j++){ //For each simulation J
@@ -404,24 +405,10 @@ bool WHAM::iterateWHAM (){
         denomInv.at(j).at(k)=1.0/denomInv.at(j).at(k);
 				for (i=0; i< this->getNWindow(); i++){ //For each F value I (simulation environment)
 					if (expBVxEx.size() == expBVE.size()){ //WHAM Extrapolation
-						fraction=expBVxEx.at(j).at(k).at(i)*denomInv.at(j).at(k);
-						FnextInv.at(i)+=fraction;
-						/*
-						fraction*=denomInv.at(j).at(k);
-						for (a=0; a< this->getNWindow(); a++){
-	            pdSum.at(i).at(a)+=expBVxEx.at(j).at(k).at(a)*fraction;
-	          }
-						*/
+						FnextInv.at(i)+=expBVxEx.at(j).at(k).at(i)*denomInv.at(j).at(k);
 					} 
 					else{ //Traditional WHAM
-						fraction=expBVE.at(j).at(k).at(i)*denomInv.at(j).at(k);
-         		FnextInv.at(i)+=fraction;
-						/*
-						fraction*=denomInv.at(j).at(k);
-						for (a=0; a< this->getNWindow(); a++){
-							pdSum.at(i).at(a)+=expBVE.at(j).at(k).at(a)*fraction;
-						}	
-						*/
+         		FnextInv.at(i)+=expBVE.at(j).at(k).at(i)*denomInv.at(j).at(k);
 					}
 				}
       }
@@ -468,7 +455,7 @@ bool WHAM::iterateWHAM (){
       std::cerr << "# Iteration = " << niter << std::endl;
     }
   }
-  
+
   return false;
 }
 
@@ -502,7 +489,7 @@ void WHAM::setMeta(const std::string &metain){
 }
 
 void WHAM::setBins(const std::string &binsin){
-  Misc::splitNum(binsin, ":", bins);
+  Misc::splitNum(binsin, ":", bins, false);
 }
 
 void WHAM::setBins(const std::vector<unsigned int> &binsin){
@@ -527,7 +514,7 @@ void WHAM::setMaxIter(const unsigned int &iterin){
 
 bool WHAM::setTemp(const std::string &tin){
   B.clear();
-  Misc::splitNum(tin, ":", B);
+  Misc::splitNum(tin, ":", B, false);
   if (B.size() <= 0){
     std::cerr << std::endl << "Error: Unrecognized temperature format " << tin;
     std::cerr << std::endl << std::endl;
@@ -554,7 +541,7 @@ bool WHAM::setTempRange(const std::string &tin){
   unsigned int i;
 
   B.clear();
-  Misc::splitNum(tin, "=", s);
+  Misc::splitNum(tin, "=", s, false);
 
   if (s.size() >= 3){
     for (i=0; i<= static_cast<unsigned int>((s.at(1)-s.at(0))/s.at(2)); i++){
@@ -763,7 +750,7 @@ void WHAM::binOnTheFly(){
 	// SUM(j=1,....,S) SUM(k=1,...,N(j)-----------------------------------------------------------------------
 	//                                    SUM(l=1,...,S) N(l)*F(l)*exp(-B(l)V(l,jk))*exp[-(B(l)-B(0))E(l,jk)]
 	//
-	// Note that one needs to re-weight each biased histogram count(jk) by expBVxEx(j,jk) when doing WHAM extrapolation!
+	// Note that one needs to re-weight each biased histogram count(jk) by expBVx(j,jk) when doing WHAM extrapolation!
 	//
 
   for (unsigned int j=0; j< this->getNWindow(); j++){
@@ -782,12 +769,12 @@ void WHAM::binOnTheFly(){
       }
       else{
         //WHAM Extrapolation
-				//The numerator is the biased histogram count re-weighted by expBVxEx for that datapoint
+				//The numerator is the biased histogram count re-weighted by expBVx for that datapoint
         if (Pun.find(b) != Pun.end()){
-          Pun[b]+=expBVxEx.at(j).at(k).at(j)*denomInv.at(j).at(k);
+          Pun[b]+=(expBVxEx.at(j).at(k).at(j)/expBVE.at(j).at(k).at(j))*denomInv.at(j).at(k);
         }
         else{
-          Pun[b]=expBVxEx.at(j).at(k).at(j)*denomInv.at(j).at(k);
+          Pun[b]=(expBVxEx.at(j).at(k).at(j)/expBVE.at(j).at(k).at(j))*denomInv.at(j).at(k);
         }
       }
     }
@@ -811,6 +798,7 @@ void WHAM::printPMF(){
 
   T=1.0/(B0*kB);
 
+  //See Histogram::printHisto for better output style
   for (it=Pun.begin(); it != Pun.end(); it++){
     coor=rCoor->getBinCoor(it->first);
     for (i=0; i< coor.size(); i++){
