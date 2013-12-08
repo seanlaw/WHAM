@@ -751,6 +751,7 @@ void WHAM::binOnTheFly(){
 	//                                    SUM(l=1,...,S) N(l)*F(l)*exp(-B(l)V(l,jk))*exp[-(B(l)-B(0))E(l,jk)]
 	//
 	// Note that one needs to re-weight each biased histogram count(jk) by expBVx(j,jk) when doing WHAM extrapolation!
+	// i.e. only the Vextrapolation term of Vx = Vbias + Vextrapolation is needed, not Vbias
 	//
 
   for (unsigned int j=0; j< this->getNWindow(); j++){
@@ -770,6 +771,7 @@ void WHAM::binOnTheFly(){
       else{
         //WHAM Extrapolation
 				//The numerator is the biased histogram count re-weighted by expBVx for that datapoint
+				//i.e. only the Vextrpolation term of Vx = Vbias + Vextrapolation is needed, not Vbias
         if (Pun.find(b) != Pun.end()){
           Pun[b]+=(expBVxEx.at(j).at(k).at(j)/expBVE.at(j).at(k).at(j))*denomInv.at(j).at(k);
         }
