@@ -4,10 +4,10 @@ include ../makefile.defs
 
 LIBOBJS = Constants.o Misc.o WHAM.o Histogram.o
 
-all:	libtools.$(LIBEXT)
+all:	libwham.$(LIBEXT)
 
-libtools.$(LIBEXT):	$(LIBOBJS)
-	$(CXX) $(CXXFLAGS) $(OPTFLAGS) $(LIBFLAGS) $^ -o libtools.$(LIBEXT)
+libwham.$(LIBEXT):	$(LIBOBJS)
+	$(CXX) $(CXXFLAGS) $(OPTFLAGS) $(LIBFLAGS) $^ -o libwham.$(LIBEXT)
 
 clean:
 	rm -rf *.o

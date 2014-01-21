@@ -1,8 +1,8 @@
 include ./makefile.defs
 
-all: libtools.$(LIBEXT) programs
+all: libwham.$(LIBEXT) programs
 
-libtools.$(LIBEXT):
+libwham.$(LIBEXT):
 	$(UNAME)
 	$(MAKE) -C lib 
 

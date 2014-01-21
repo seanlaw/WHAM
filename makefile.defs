@@ -5,7 +5,7 @@ OPTFLAGS = -O3
 #DEBUG = -g
 EIGENLIBS = ../
 INCFLAGS = -I../lib -I$(EIGENLIBS)
-LINKFLAGS = -L../lib -ltools
+LINKFLAGS = -L../lib -lwham
 BINDIR = ../bin
 ifeq ($(shell uname -o 2>/dev/null), Cygwin)
 	LIBEXT=dll

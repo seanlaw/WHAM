@@ -2,9 +2,9 @@
 
 include ../makefile.defs
 
-OBJS = libtools.$(LIBEXT)
+OBJS = libwham.$(LIBEXT)
 
-all:	$(BINDIR) libtools.$(LIBEXT) wham
+all:	$(BINDIR) libwham.$(LIBEXT) wham
 
 clean:
 	rm -rf *.o
@@ -15,8 +15,8 @@ clean:
 $(BINDIR):
 	mkdir -p $(BINDIR)
 
-libtools.$(LIBEXT):
-	$(MAKE) -C ../lib libtools.$(LIBEXT)
+libwham.$(LIBEXT):
+	$(MAKE) -C ../lib libwham.$(LIBEXT)
 
 wham: wham.o $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OPTFLAGS) $(DEBUG) $(LINKFLAGS) -o $(BINDIR)/$@ $<
