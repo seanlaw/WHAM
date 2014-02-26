@@ -810,8 +810,6 @@ void WHAM::printPMF(){
 		nbins*=b.at(i);
 	}
 
-  //See Histogram::printHisto for better output style
-  //for (it=Pun.begin(); it != Pun.end(); it++){ 
 	for (i=0; i< nbins; i++){
 		if ((it=Pun.find(i)) != Pun.end()){
     	coor=rCoor->getBinCoor(it->first);
