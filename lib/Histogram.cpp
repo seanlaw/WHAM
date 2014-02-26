@@ -15,9 +15,10 @@ Histogram::Histogram(const unsigned &ninpin, const unsigned int &ndimin){
   defaultBins=25;
   convDim.clear();
   binwidth.clear();
+  TOTAL=0;
 }
 
-void Histogram::updateMAXMIN(const std::vector<double> &sin){
+void Histogram::updateMaxMin(const std::vector<double> &sin){
   //Global Max/Min
   for (unsigned int i=0; i< MIN.size(); i++){
     if (sin.at(i) < MIN.at(i)){
@@ -30,12 +31,12 @@ void Histogram::updateMAXMIN(const std::vector<double> &sin){
 }
 
 void Histogram::appendData(const std::vector<double> &sin, const unsigned int &nfilein){
-  this->updateMAXMIN(sin);
+  this->updateMaxMin(sin);
   data.at(nfilein).push_back(sin);
 }
 
 void Histogram::setBins(const std::string &binsin){
-  Misc::splitNum(binsin, ":", bins);
+  Misc::splitNum(binsin, ":", bins, false);
 }
 
 void Histogram::setBins(const std::vector<unsigned int> &binsin){
@@ -50,7 +51,7 @@ void Histogram::setBins(const std::vector<int> &binsin){
   }
 }
 
-void Histogram::genHISTO(const bool reduceFlag){
+void Histogram::genHisto(const bool reduceFlag){
   unsigned int i;
   unsigned int j;
   unsigned int k;
@@ -89,6 +90,7 @@ void Histogram::genHISTO(const bool reduceFlag){
     for (k=0; k< data.at(j).size(); k++){ //Each datapoint K in J
       b=this->getBin(j, k);
       HISTO.at(b)=HISTO.at(b)+1;
+      TOTAL++;
       if (reduceFlag == true){
         //Reduce the dimensions to 1-D and store the bin
         data.at(j).at(k).resize(1);
@@ -154,15 +156,26 @@ unsigned int Histogram::getBin(const unsigned int &nfilein, const unsigned int &
   return b;
 }
 
-void Histogram::printHISTO (){
+std::vector<unsigned int> Histogram::getBins (){
+	return bins;
+}
+
+void Histogram::printHisto (HistoFormatEnum format, double temp){
   unsigned int i;
-  unsigned int j;
   unsigned int b;
+  unsigned int j;
   std::vector<unsigned int> convDim;
   std::vector<double> binwidth;
+  double norm;
   std::vector<double> s;
+  double kBT;
+  std::vector<binpair> sortedHISTO;
+  double last;
 
   binwidth.resize(nDim);
+  kBT=kB*temp;
+  norm=1.0;
+  last=std::numeric_limits<double>::min();
 
   j=1; //Track total number of bins
   for (i=0; i< nDim; i++){
@@ -174,6 +187,7 @@ void Histogram::printHISTO (){
       bins.push_back(defaultBins);
     }
     binwidth.at(i)=(MAX.at(i)-MIN.at(i))/bins.at(i);
+    norm*=binwidth.at(i);
   }
 
   HISTO.resize(j,0);
@@ -186,16 +200,48 @@ void Histogram::printHISTO (){
     }
   }
 
+  //Get a vector of indices to HISTO sorted by the bin value
+  for (b=0; b< HISTO.size(); b++){
+    s=this->getBinCoor(b);
+    sortedHISTO.push_back(binpair());
+    sortedHISTO.at(b).bininx=b;
+    sortedHISTO.at(b).binval=s;
+  }
+  //Sort the bins wrt the bin value 
+  std::sort(sortedHISTO.begin(), sortedHISTO.end(), sortBinVal);
 
   //1-D to n-D
-  for(b=0; b< HISTO.size(); b++){
+  for (j=0; j< HISTO.size(); j++){
+    b=sortedHISTO.at(j).bininx;
     s=this->getBinCoor(b);
-    for (i=0; i< s.size(); i++){
-      std::cerr << s.at(i) << " ";
+    if (last != s.at(0)){
+      std::cout << std::endl;
+      last=s.at(0);
     }
-    std::cerr << HISTO.at(b) << std::endl;
+    for (i=0; i< s.size(); i++){
+      std::cout << s.at(i) << "  ";
+    }
+    if (format == PROBABILITY){
+      std::cout << static_cast<double>(HISTO.at(b))/TOTAL << std::endl;
+    }
+    else if (format == DENSITY){
+      //Normalized probability, normalized by the bin width(s) (dx*dy*dz)
+      //The area under the curve sums to one
+      //The probability density is the height of the point (no width)
+      //Use this when comparing shifts in the population (shifts in the area under the curve)
+      std::cout << static_cast<double>(HISTO.at(b))/(TOTAL*norm) << std::endl;
+    }
+    else if (format == ENERGY){
+      //Free energy from the probability
+      //This is identical to the free energy calculated from the probability density
+      //but shifted by a constant that is proportional to the bin width(s) (dx*dy*dz)
+      std::cout << -kBT*log(static_cast<double>(HISTO.at(b))/TOTAL) << std::endl;
+    }
+    else{
+      //Raw Histogram Count
+      std::cout << HISTO.at(b) << std::endl;
+    }
   }
- 
 }
 
 std::vector<double> Histogram::getBinCoor(const unsigned int &bin){
@@ -205,11 +251,13 @@ std::vector<double> Histogram::getBinCoor(const unsigned int &bin){
   std::vector<double> s;
 
   rem=bin;
-  for (i=nDim-1; i>=0 && i != UINT_MAX; i--){
+  for (i=nDim-1; i != std::numeric_limits<unsigned int>::max(); i--){
    div=rem/convDim.at(i);
    rem=rem % convDim.at(i);
    s.push_back(MIN.at(i)+binwidth.at(i)*(static_cast<double>(div+0.5)));
   }
+
+  std::reverse(s.begin(), s.end());
 
   return s;
 }
@@ -221,3 +269,22 @@ unsigned int Histogram::getNFile(){
 unsigned int Histogram::getNData(int element){
   return data.at(element).size();
 }
+
+std::vector<unsigned int>& Histogram::getHisto(){
+  return HISTO;
+}
+
+unsigned int Histogram::getHistoSize(){
+  return HISTO.size();
+}
+
+bool Histogram::sortBinVal(const binpair &a, const binpair &b){
+  for (unsigned int i=0; i< a.binval.size(); i++){
+    if (a.binval.at(i) != b.binval.at(i)){
+      return a.binval.at(i) < b.binval.at(i);
+    }
+  }
+  
+  return false;
+}
+

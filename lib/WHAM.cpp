@@ -795,18 +795,49 @@ void WHAM::printPMF(){
   //Note that Pun has map keys that are already in sorted order
   std::map<unsigned int, double>::iterator it;
   std::vector<double> coor;
-  unsigned int i;
+  unsigned int i, j;
+	unsigned int nbins;
   double T;
-
+	double last;
+	std::vector<unsigned int> b;
+	
+	last=std::numeric_limits<double>::min();
   T=1.0/(B0*kB);
 
+	b=rCoor->getBins();
+	nbins=1;
+	for (i=0; i< b.size(); i++){
+		nbins*=b.at(i);
+	}
+
   //See Histogram::printHisto for better output style
-  for (it=Pun.begin(); it != Pun.end(); it++){
-    coor=rCoor->getBinCoor(it->first);
-    for (i=0; i< coor.size(); i++){
-      std::cout << coor.at(i) << "   ";
-    }
-    std::cout << -kB*T*log(it->second) << "   ";
-    std::cout << it->second << std::endl;
-  }
+  //for (it=Pun.begin(); it != Pun.end(); it++){ 
+	for (i=0; i< nbins; i++){
+		if ((it=Pun.find(i)) != Pun.end()){
+    	coor=rCoor->getBinCoor(it->first);
+			std::reverse(coor.begin(), coor.end());
+			if (last != coor.at(0)){
+				std::cout << std::endl;
+				last=coor.at(0);
+			}
+    	for (j=0; j< coor.size(); j++){
+      	std::cout << coor.at(j) << "   ";
+    	}
+    	std::cout << -kB*T*log(it->second) << "   ";
+    	std::cout << it->second << std::endl;
+		}
+		else{
+			coor=rCoor->getBinCoor(i);
+    	std::reverse(coor.begin(), coor.end());
+    	if (last != coor.at(0)){
+      	std::cout << std::endl;
+      	last=coor.at(0);
+    	}
+    	for (j=0; j< coor.size(); j++){
+      	std::cout << coor.at(j) << "   ";
+    	}
+    	std::cout << "NaN   ";
+    	std::cout << "0.0" << std::endl;
+		}
+	}
 }
