@@ -814,7 +814,7 @@ void WHAM::printPMF(){
 		if ((it=Pun.find(i)) != Pun.end()){
     	coor=rCoor->getBinCoor(it->first);
 			std::reverse(coor.begin(), coor.end());
-			if (last != coor.at(0)){
+			if (last != coor.at(0) && coor.size() > 1){
 				std::cout << std::endl;
 				last=coor.at(0);
 			}
@@ -827,7 +827,7 @@ void WHAM::printPMF(){
 		else{
 			coor=rCoor->getBinCoor(i);
     	std::reverse(coor.begin(), coor.end());
-    	if (last != coor.at(0)){
+    	if (last != coor.at(0) && coor.size() > 1){
       	std::cout << std::endl;
       	last=coor.at(0);
     	}
