@@ -12,6 +12,12 @@
 #include <limits>
 #include <algorithm>
 
+//Left outside of class to be accessed by WHAM
+struct binpair {
+  unsigned int bininx;               
+  std::vector<double> binval;
+};
+
 class Histogram {
   private:
     std::vector<unsigned int> HISTO; //Global Linear Histogram
@@ -24,10 +30,10 @@ class Histogram {
     std::vector<unsigned int> convDim;
     std::vector<double> binwidth;
     unsigned int TOTAL;
-    struct binpair {
-      unsigned int bininx;              
-      std::vector<double> binval;
-    };
+//    struct binpair {
+//      unsigned int bininx;              
+//      std::vector<double> binval;
+//    };
 
 
   public:

@@ -795,26 +795,38 @@ void WHAM::printPMF(){
   //Note that Pun has map keys that are already in sorted order
   std::map<unsigned int, double>::iterator it;
   std::vector<double> coor;
-  unsigned int i, j;
+  unsigned int i, j, b;
 	unsigned int nbins;
   double T;
 	double last;
-	std::vector<unsigned int> b;
+	std::vector<unsigned int> bins;
+	std::vector<double> s;
+	std::vector<binpair> sortedHISTO;
 	
 	last=std::numeric_limits<double>::min();
   T=1.0/(B0*kB);
 
-	b=rCoor->getBins();
+	bins=rCoor->getBins();
 	nbins=1;
-	for (i=0; i< b.size(); i++){
-		nbins*=b.at(i);
+	for (i=0; i< bins.size(); i++){
+		nbins*=bins.at(i);
 	}
 
+	//Get a vector of indices to HISTO sorted by the bin value
+  for (b=0; b< nbins; b++){
+    s=rCoor->getBinCoor(b);
+    sortedHISTO.push_back(binpair());
+    sortedHISTO.at(b).bininx=b;
+    sortedHISTO.at(b).binval=s;
+  }
+  //Sort the bins wrt the bin value 
+  std::sort(sortedHISTO.begin(), sortedHISTO.end(), Histogram::sortBinVal);
+
 	for (i=0; i< nbins; i++){
-		if ((it=Pun.find(i)) != Pun.end()){
-    	coor=rCoor->getBinCoor(it->first);
-			std::reverse(coor.begin(), coor.end());
-			if (last != coor.at(0) && coor.size() > 1){
+		b=sortedHISTO.at(i).bininx;
+		if ((it=Pun.find(b)) != Pun.end()){
+    	coor=rCoor->getBinCoor(b);
+			if (last != coor.at(0) && coor.size() > 1 ){
 				std::cout << std::endl;
 				last=coor.at(0);
 			}
@@ -825,8 +837,8 @@ void WHAM::printPMF(){
     	std::cout << it->second << std::endl;
 		}
 		else{
-			coor=rCoor->getBinCoor(i);
-    	std::reverse(coor.begin(), coor.end());
+			//Zero probability bins
+			coor=rCoor->getBinCoor(b);
     	if (last != coor.at(0) && coor.size() > 1){
       	std::cout << std::endl;
       	last=coor.at(0);
