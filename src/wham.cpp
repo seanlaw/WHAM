@@ -13,6 +13,7 @@ void usage(){
   std::cerr << "Options: [-bins rcoor1[:rcoor2[:rcoor3]]]" << std::endl;
   std::cerr << "         [-iter value] [-tol value | -Ftol value]" << std::endl;
   std::cerr << "         [-temp T1[:T2...[[:TN[:Ttarget]]]] | -temp T1=TN=[incr[=Ttarget]]]" << std::endl;
+	std::cerr << "         [-exp n:T1:T2]" << std::endl;
   std::cerr << "         [-fguess file | -fval file]" << std::endl;
   std::cerr << std::endl;
   exit(0);
@@ -93,6 +94,11 @@ int main (int argc, char **argv){
       fguess=currArg;
       fval.clear();
     }
+		else if (currArg.compare("-exp") == 0){
+			currArg=argv[++i];
+			wham->getExpTempRange(currArg);
+			return 0;
+		}
     else{
       wham->setMeta(currArg);
     }

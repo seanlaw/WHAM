@@ -571,6 +571,31 @@ bool WHAM::setTempRange(const std::string &tin){
   }
 }
 
+void WHAM::getExpTempRange(const std::string &tin){
+	std::vector<double> s;
+	unsigned int i;
+	double currT;
+	double f;
+
+	Misc::splitNum(tin, ":", s, false);
+
+	if (s.size() == 3){
+		f=exp(log(s.at(2)/s.at(1))/(static_cast<unsigned int>(s.at(0))-1));
+		currT=s.at(1);
+		for (i=0; i< s.at(0); i++){
+			std::cout << std::fixed;
+			std::cout << std::setprecision(4) << currT;
+			if (i<s.at(0)-1){
+				std::cout << ":";
+			}
+			else{
+				std::cout << std::endl;
+			}
+			currT=currT*f;
+		}
+	}
+}
+
 void WHAM::setFactor(const double &factorin){
   factorFlag=true;
   factor=factorin;
