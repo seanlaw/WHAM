@@ -2,14 +2,6 @@
 
 #include "Misc.hpp"
 
-std::string Misc::single (const std::string &resnamein){
-	if (resnamein == "T"){
-
-	}
-	
-	return "";
-}
-
 void Misc::splitStr (const std::string &str, const std::string &delim, std::vector<std::string> &out, const bool repeat){
   size_t p0=0;
   size_t p1=std::string::npos;
@@ -47,13 +39,15 @@ void Misc::splitStr (const std::string &str, const std::string &delim, std::vect
 }
 
 template <class SplitVec>
-void Misc::splitNum (const std::string &str, const std::string &delim, SplitVec &out, const bool repeat){
+void Misc::splitNum (const std::string &str, const std::string &delim, std::vector<SplitVec> &out, const bool repeat){
 	out.clear();
 	out.reserve(500); //Still need resizing but reduces moving of data in memory
   size_t p0=0;
   size_t p1=std::string::npos;
   size_t plast=std::string::npos;
-	int n=0;
+  SplitVec tmp;
+
+  //Only use this if all columns are needed as a number!
 
   //"repeat" = true means that a blank string is added when there are
   //back-to-back delimiters. Otherwise, repeat=false ignores back-to-back delimiters.
@@ -63,15 +57,13 @@ void Misc::splitNum (const std::string &str, const std::string &delim, SplitVec 
 
   while (p1 != std::string::npos){
     if (p1-p0 > 0){
-			out.resize(n+1);
-			std::stringstream(str.substr(p0,p1-p0)) >> out.at(n);
-			n++;
+      std::stringstream(str.substr(p0,p1-p0)) >> tmp;
+      out.push_back(tmp);
     }
     else{
       if (repeat){
-				out.resize(n+1);
-				std::stringstream(str.substr(p0,p1-p0)) >> out.at(n);
-				n++;
+        std::stringstream(str.substr(p0,p1-p0)) >> tmp;
+        out.push_back(tmp);
       }
     }
     p0=p1+1;
@@ -79,27 +71,26 @@ void Misc::splitNum (const std::string &str, const std::string &delim, SplitVec 
   }
   //After last delimiter
   if (plast != std::string::npos && plast >= p0){
-		out.resize(n+1);
-		std::stringstream(str.substr(p0,p1-p0)) >> out.at(n);
-		n++;
+    std::stringstream(str.substr(p0,p1-p0)) >> tmp;
+    out.push_back(tmp);
   }
   else{
     if (repeat){
-			out.resize(n+1);
-			std::stringstream(str.substr(p0,p1-p0)) >> out.at(n);
-			n++;
+      std::stringstream(str.substr(p0,p1-p0)) >> tmp;
+      out.push_back(tmp);
     }
   }
   //std::cerr << out.size() << std::endl;
 }
 
-template void Misc::splitNum<std::vector<int> > (const std::string&, const std::string&, std::vector<int>&, const bool);
+template void Misc::splitNum<int> (const std::string&, const std::string&, std::vector<int>&, const bool);
 
-template void Misc::splitNum<std::vector<unsigned int> > (const std::string&, const std::string&, std::vector<unsigned int>&, const bool);
+template void Misc::splitNum<unsigned int> (const std::string&, const std::string&, std::vector<unsigned int>&, const bool);
 
-template void Misc::splitNum<std::vector<double> > (const std::string&, const std::string&, std::vector<double>&, const bool);
+template void Misc::splitNum<double> (const std::string&, const std::string&, std::vector<double>&, const bool);
 
-template void Misc::splitNum<std::vector<float> > (const std::string&, const std::string&, std::vector<float>&, const bool);
+template void Misc::splitNum<float> (const std::string&, const std::string&, std::vector<float>&, const bool);
+
 
 bool Misc::isdigit (const std::string &str){
   return str.find_first_not_of("0123456789") == std::string::npos;
@@ -200,6 +191,18 @@ void Misc::toupper (std::string &str){
   std::transform(str.begin(), str.end(), str.begin(), ::toupper);
 }
 
+int Misc::atoi (std::string &str, const unsigned int offset){
+	int val;
+	const char *a;
+	val=0;
+
+	if (Misc::isalpha(str.substr(offset, 1))){
+		a=str.substr(offset,1).c_str();
+		val=static_cast<int>(a[0]-'A')+1; //A = 1, B = 2, etc
+	}
+	return val;
+}
+
 double Misc::hypot (const double &a, const double &b){
 	if (a !=0){
 		return a*sqrt(1+(b/a)*(b/a));
@@ -212,22 +215,32 @@ double Misc::hypot (const double &a, const double &b){
 	}
 }
 
-bool Misc::sortPairFirst(const std::pair<int, int> &a, const std::pair<int, int> &b){
-  return (a.first < b.first);
+template <class First, class Second>
+bool Misc::sortPairFirst(const std::pair<First, Second> &a, const std::pair<First, Second> &b){
+	return (a.first < b.first);
 }
 
+template bool Misc::sortPairFirst<double, std::string>(const std::pair<double, std::string> &a, const std::pair<double, std::string> &b);
 
-bool Misc::sortPairSecond(const std::pair<int, int> &a, const std::pair<int, int> &b){
-	return (a.second < b.second);
+template <class First, class Second>
+bool Misc::sortPairSecond(const std::pair<First, Second> &a, const std::pair<First, Second> &b){
+  return (a.second < b.second);
 }
 
-bool Misc::findUniqueFirst(const std::pair<int, int> &a, const std::pair<int, int> &b){
+template bool Misc::sortPairSecond<int, int>(const std::pair<int, int> &a, const std::pair<int, int> &b);
+
+template <class First, class Second>
+bool Misc::findUniqueFirst(const std::pair<First, Second> &a, const std::pair<First, Second> &b){
 	return (a.first == b.first);
 }
 
-bool Misc::findUniqueSecond(const std::pair<int, int> &a, const std::pair<int, int> &b){
+template bool Misc::findUniqueFirst<int, int>(const std::pair<int, int> &a, const std::pair<int, int> &b);
+
+
+template <class First, class Second>
+bool Misc::findUniqueSecond(const std::pair<First, Second> &a, const std::pair<First, Second> &b){
 	return (a.second == b.second);
 }
 
-
+template bool Misc::findUniqueSecond(const std::pair<int, int> &a, const std::pair<int, int> &b);
 

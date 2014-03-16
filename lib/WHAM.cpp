@@ -837,20 +837,19 @@ void WHAM::printPMF(){
 		nbins*=bins.at(i);
 	}
 
-	//Get a vector of indices to HISTO sorted by the bin value
+	rCoor->getHisto().resize(nbins);
   for (b=0; b< nbins; b++){
-    s=rCoor->getBinCoor(b);
-    sortedHISTO.push_back(binpair());
-    sortedHISTO.at(b).bininx=b;
-    sortedHISTO.at(b).binval=s;
+		rCoor->getHisto().at(b).setInx(b);
+		rCoor->getHisto().at(b).setLabel(rCoor->getBinCoor(b));
   }
-  //Sort the bins wrt the bin value 
-  std::sort(sortedHISTO.begin(), sortedHISTO.end(), Histogram::sortBinVal);
+
+	//Sort based on the label, not the index
+  std::sort(rCoor->getHisto().begin(), rCoor->getHisto().end(), Histogram::sortBinLabel);
 
 	for (i=0; i< nbins; i++){
-		b=sortedHISTO.at(i).bininx;
+		b=rCoor->getHisto().at(i).getInx();
+		coor=rCoor->getHisto().at(i).getLabel();
 		if ((it=Pun.find(b)) != Pun.end()){
-    	coor=rCoor->getBinCoor(b);
 			if (last != coor.at(0) && coor.size() > 1 ){
 				std::cout << std::endl;
 				last=coor.at(0);
@@ -863,7 +862,6 @@ void WHAM::printPMF(){
 		}
 		else{
 			//Zero probability bins
-			coor=rCoor->getBinCoor(b);
     	if (last != coor.at(0) && coor.size() > 1){
       	std::cout << std::endl;
       	last=coor.at(0);

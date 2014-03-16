@@ -6,6 +6,7 @@
 #include "Enum.hpp"
 #include "Misc.hpp"
 #include "Constants.hpp"
+#include "Bin.hpp"
 
 #include <vector>
 #include <iostream>
@@ -21,6 +22,7 @@ struct binpair {
 class Histogram {
   private:
     std::vector<unsigned int> HISTO; //Global Linear Histogram
+		std::vector<Bin> Histo; //Global Linear Histogram
     std::vector<double> MAX; //Global Max
     std::vector<double> MIN; //Global Min
     std::vector< std::vector< std::vector< double > > > data;
@@ -30,11 +32,6 @@ class Histogram {
     std::vector<unsigned int> convDim;
     std::vector<double> binwidth;
     unsigned int TOTAL;
-//    struct binpair {
-//      unsigned int bininx;              
-//      std::vector<double> binval;
-//    };
-
 
   public:
     Histogram(const unsigned &ninpin, const unsigned int &ndimin);
@@ -50,9 +47,10 @@ class Histogram {
     std::vector<double> getBinCoor(const unsigned int &bin);
     unsigned int getNFile();
     unsigned int getNData(int element);
-    std::vector<unsigned int>& getHisto();
+		std::vector<Bin>& getHisto();
     unsigned int getHistoSize();
     static bool sortBinVal(const binpair &a, const binpair &b);
+		static bool sortBinLabel(const Bin &a, const Bin &b);
 };
 
 #endif
