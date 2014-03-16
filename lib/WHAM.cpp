@@ -826,7 +826,6 @@ void WHAM::printPMF(){
 	double last;
 	std::vector<unsigned int> bins;
 	std::vector<double> s;
-	std::vector<binpair> sortedHISTO;
 	
 	last=std::numeric_limits<double>::min();
   T=1.0/(B0*kB);

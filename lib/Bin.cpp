@@ -36,3 +36,6 @@ std::vector<double>& Bin::getLabelVec (){
 	return label;
 }
 
+const std::vector<double>& Bin::getLabelVec () const{
+	return label;
+}

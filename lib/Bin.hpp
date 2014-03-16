@@ -20,6 +20,7 @@ class Bin {
 		unsigned int getInx();
 		std::vector<double> getLabel();
 		std::vector<double>& getLabelVec();
+		const std::vector<double>& getLabelVec() const;
 };
 
 #endif

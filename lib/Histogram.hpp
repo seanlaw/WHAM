@@ -13,15 +13,8 @@
 #include <limits>
 #include <algorithm>
 
-//Left outside of class to be accessed by WHAM
-struct binpair {
-  unsigned int bininx;               
-  std::vector<double> binval;
-};
-
 class Histogram {
   private:
-    std::vector<unsigned int> HISTO; //Global Linear Histogram
 		std::vector<Bin> Histo; //Global Linear Histogram
     std::vector<double> MAX; //Global Max
     std::vector<double> MIN; //Global Min
@@ -49,7 +42,6 @@ class Histogram {
     unsigned int getNData(int element);
 		std::vector<Bin>& getHisto();
     unsigned int getHistoSize();
-    static bool sortBinVal(const binpair &a, const binpair &b);
 		static bool sortBinLabel(const Bin &a, const Bin &b);
 };
 

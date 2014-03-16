@@ -208,7 +208,7 @@ void Histogram::printHisto (HistoFormatEnum format, double temp){
 
   //1-D to n-D
 	for (j=0; j< Histo.size(); j++){
-		s=Histo.at(j).getLabel();
+		s=Histo.at(j).getLabelVec();
     if (last != s.at(0) && s.size() > 1){
       std::cout << std::endl;
       last=s.at(0);
@@ -273,26 +273,10 @@ unsigned int Histogram::getHistoSize(){
 	return Histo.size();
 }
 
-bool Histogram::sortBinVal(const binpair &a, const binpair &b){
-  for (unsigned int i=0; i< a.binval.size(); i++){
-    if (a.binval.at(i) != b.binval.at(i)){
-      return a.binval.at(i) < b.binval.at(i);
-    }
-  }
-  
-  return false;
-}
-
 bool Histogram::sortBinLabel(const Bin &a, const Bin &b){
-	//Not entirely sure why I need to do this but it has to do with const
-	Bin A, B;
-
-	A=a;
-	B=b;
-
-  for (unsigned int i=0; i< A.getLabel().size(); i++){
-    if (A.getLabel().at(i) != B.getLabel().at(i)){
-      return A.getLabel().at(i) < B.getLabel().at(i);
+  for (unsigned int i=0; i< a.getLabelVec().size(); i++){
+    if (a.getLabelVec().at(i) != b.getLabelVec().at(i)){
+      return a.getLabelVec().at(i) < b.getLabelVec().at(i);
     }
   }
 
