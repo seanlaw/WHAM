@@ -2,7 +2,7 @@
 
 include ../makefile.defs
 
-LIBOBJS = Bin.o Constants.o Enum.o Histogram.o Misc.o WHAM.o
+LIBOBJS = Bin.o Histogram.o Misc.o WHAM.o
 
 all:	libwham.$(LIBEXT)
 
