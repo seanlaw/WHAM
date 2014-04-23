@@ -1,16 +1,9 @@
 MAKE = make
 CXX = g++
-CXXFLAGS = -Wall -lm
+CXXFLAGS = -Wall 
 OPTFLAGS = -O3
 #DEBUG = -g
-EIGENLIBS = ../
-INCFLAGS = -I../lib -I$(EIGENLIBS)
+INCFLAGS = -I../lib 
 LINKFLAGS = -L../lib -lwham
 BINDIR = ../bin
-ifeq ($(shell uname -o 2>/dev/null), Cygwin)
-	LIBEXT=dll
-	LIBFLAGS = -shared -I$(EIGENLIBS)
-else
-	LIBEXT=so
-	LIBFLAGS = -fpic -shared -I$(EIGENLIBS)
-endif
+LIBEXT=a

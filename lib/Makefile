@@ -7,7 +7,7 @@ LIBOBJS = Bin.o Histogram.o Misc.o WHAM.o
 all:	libwham.$(LIBEXT)
 
 libwham.$(LIBEXT):	$(LIBOBJS)
-	$(CXX) $(CXXFLAGS) $(OPTFLAGS) $(LIBFLAGS) $^ -o libwham.$(LIBEXT)
+	 ar rc libwham.$(LIBEXT) $(LIBOBJS)
 
 clean:
 	rm -rf *.o
