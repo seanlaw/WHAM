@@ -29,7 +29,7 @@ along with MoleTools.  If not, see <http://www.gnu.org/licenses/>.
 
 class Histogram {
   private:
-		std::vector<Bin> Histo; //Global Linear Histogram
+    std::vector<Bin> Histo; //Global Linear Histogram
     std::vector<double> MAX; //Global Max
     std::vector<double> MIN; //Global Min
     std::vector< std::vector< std::vector< double > > > data;
@@ -49,14 +49,14 @@ class Histogram {
     void setBins(const std::vector<int> &binsin);
     void genHisto(const bool reduceFlag=false); //Global Histogram
     unsigned int getBin(const unsigned int &nfilein, const unsigned int &ndatain); //For binning on the fly
-		std::vector<unsigned int> getBins ();
+    std::vector<unsigned int> getBins ();
     void printHisto(HistoFormatEnum format=COUNT, double temp=300); //Global Histogram
     std::vector<double> getBinCoor(const unsigned int &bin);
     unsigned int getNFile();
     unsigned int getNData(int element);
-		std::vector<Bin>& getHisto();
+    std::vector<Bin>& getHisto();
     unsigned int getHistoSize();
-		static bool sortBinLabel(const Bin &a, const Bin &b);
+    static bool sortBinLabel(const Bin &a, const Bin &b);
 };
 
 #endif

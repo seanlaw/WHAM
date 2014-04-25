@@ -34,7 +34,7 @@ class WHAM {
     std::vector<double> Fguess;
     std::vector<double> F; //Final exp(B(i)*f(i))
     std::vector< std::vector< std::vector<double> > > expBVE; //Is dynamic and can be jagged
-		std::vector< std::vector< std::vector<double> > > expBVxEx; //Is dynamic and can be jagged
+    std::vector< std::vector< std::vector<double> > > expBVxEx; //Is dynamic and can be jagged
     unsigned int nWindow;
     std::string fMeta;
     std::vector<unsigned int> bins;
@@ -70,7 +70,7 @@ class WHAM {
     bool setTemp(const std::string &tin);
     void setTemp(const std::vector<double> &tin);
     bool setTempRange(const std::string &tin);
-		void getExpTempRange(const std::string &tin);
+    void getExpTempRange(const std::string &tin);
     void setFactor(const double &factorin);
     void setNWindow(const unsigned int &nwin);
     void setNWindow(const int &nwin);

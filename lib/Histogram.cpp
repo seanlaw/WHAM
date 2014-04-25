@@ -95,7 +95,7 @@ void Histogram::genHisto(const bool reduceFlag){
     binwidth.at(i)=(MAX.at(i)-MIN.at(i))/bins.at(i);
   }
 
-	Histo.resize(j);
+  Histo.resize(j);
 
   if (convDim.size() == 0){
     //Only set this once globally
@@ -110,16 +110,16 @@ void Histogram::genHisto(const bool reduceFlag){
     }
   }
 
-	for (b=0; b< Histo.size(); b++){
+  for (b=0; b< Histo.size(); b++){
     Histo.at(b).setInx(b);
     this->getBinCoor(b);
     Histo.at(b).setLabel(this->getBinCoor(b));
-  }	
+  } 
 
   for (j=0; j< data.size(); j++){ //Each simulation window J
     for (k=0; k< data.at(j).size(); k++){ //Each datapoint K in J
       b=this->getBin(j, k);
-			Histo.at(b).setN(Histo.at(b).getN()+1);
+      Histo.at(b).setN(Histo.at(b).getN()+1);
       TOTAL++;
       if (reduceFlag == true){
         //Reduce the dimensions to 1-D and store the bin
@@ -188,7 +188,7 @@ unsigned int Histogram::getBin(const unsigned int &nfilein, const unsigned int &
 }
 
 std::vector<unsigned int> Histogram::getBins (){
-	return bins;
+  return bins;
 }
 
 void Histogram::printHisto (HistoFormatEnum format, double temp){
@@ -228,11 +228,11 @@ void Histogram::printHisto (HistoFormatEnum format, double temp){
     }
   }
 
-	std::sort(Histo.begin(), Histo.end(), sortBinLabel);
+  std::sort(Histo.begin(), Histo.end(), sortBinLabel);
 
   //1-D to n-D
-	for (j=0; j< Histo.size(); j++){
-		s=Histo.at(j).getLabelVec();
+  for (j=0; j< Histo.size(); j++){
+    s=Histo.at(j).getLabelVec();
     if (last != s.at(0) && s.size() > 1){
       std::cout << std::endl;
       last=s.at(0);
@@ -241,24 +241,24 @@ void Histogram::printHisto (HistoFormatEnum format, double temp){
       std::cout << s.at(i) << "  ";
     }
     if (format == PROBABILITY){
-			std::cout << static_cast<double>(Histo.at(j).getN())/TOTAL << std::endl;
+      std::cout << static_cast<double>(Histo.at(j).getN())/TOTAL << std::endl;
     }
     else if (format == DENSITY){
       //Normalized probability, normalized by the bin width(s) (dx*dy*dz)
       //The area under the curve sums to one
       //The probability density is the height of the point (no width)
       //Use this when comparing shifts in the population (shifts in the area under the curve)
-			std::cout << static_cast<double>(Histo.at(j).getN())/(TOTAL*norm) << std::endl;
+      std::cout << static_cast<double>(Histo.at(j).getN())/(TOTAL*norm) << std::endl;
     }
     else if (format == ENERGY){
       //Free energy from the probability
       //This is identical to the free energy calculated from the probability density
       //but shifted by a constant that is proportional to the bin width(s) (dx*dy*dz)
-			std::cout << -kBT*log(static_cast<double>(Histo.at(j).getN())/TOTAL) << std::endl;
+      std::cout << -kBT*log(static_cast<double>(Histo.at(j).getN())/TOTAL) << std::endl;
     }
     else{
       //Raw Histogram Count
-			std::cout << Histo.at(j).getN() << std::endl;
+      std::cout << Histo.at(j).getN() << std::endl;
     }
   }
 }
@@ -290,11 +290,11 @@ unsigned int Histogram::getNData(int element){
 }
 
 std::vector<Bin>& Histogram::getHisto(){
-	return Histo;
+  return Histo;
 }
 
 unsigned int Histogram::getHistoSize(){
-	return Histo.size();
+  return Histo.size();
 }
 
 bool Histogram::sortBinLabel(const Bin &a, const Bin &b){

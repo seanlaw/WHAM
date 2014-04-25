@@ -34,7 +34,7 @@ WHAM::WHAM (){
   Fguess.clear();
   F.clear();
   expBVE.clear();
-	expBVxEx.clear();
+  expBVxEx.clear();
   nWindow=0;
   fMeta.clear();
   bins.clear();
@@ -171,9 +171,9 @@ void WHAM::processEnergies(){
             expBVE.at(j).at(k).resize(this->getNWindow());
             expBVxEx.at(j).at(k).resize(this->getNWindow());
             for (i=0; i< this->getNWindow(); i++){
-							//V = Vbias
+              //V = Vbias
               expBVE.at(j).at(k).at(i)=exp(-B.at(i)*v.at(i)) * exp(-(B.at(i)-B0)*e.at(0));
-							//Vx = Vbias + Vextrapolation
+              //Vx = Vbias + Vextrapolation
               expBVxEx.at(j).at(k).at(i)=exp(-B.at(i)*(v.at(i)+v.at(i+this->getNWindow()))) * exp(-(B.at(i)-B0)*e.at(0));
             }
           }
@@ -228,9 +228,9 @@ void WHAM::processEnergies(){
           expBVE.at(j).at(k).resize(this->getNWindow());
           expBVxEx.at(j).at(k).resize(this->getNWindow());
           for (i=0; i< this->getNWindow(); i++){
-						//V = Vbias
+            //V = Vbias
             expBVE.at(j).at(k).at(i)=exp(-B.at(i)*v.at(i));
-						//Vx = Vbias + Vextrapolation
+            //Vx = Vbias + Vextrapolation
             expBVxEx.at(j).at(k).at(i)=exp(-B.at(i)*(v.at(i)+v.at(i+this->getNWindow())));
           }
         }
@@ -375,8 +375,8 @@ bool WHAM::iterateWHAM (){
   double flast; //Temporary variable
   double FnextInvZero; //Temporary variable
   double df; //fabs(f(i,next) - f(i,last))
-	time_t start;
-	double stop;
+  time_t start;
+  double stop;
  
   // WHAM Formalism (Adapted from Michael Andrec)
   //
@@ -389,7 +389,7 @@ bool WHAM::iterateWHAM (){
 
   // Comments
   // expBVE.size() = Number of simulations/windows, S = nWindow
-	// expBVE.at(i).size() = Number of datapoints, N(i) in the ith simulation/window
+  // expBVE.at(i).size() = Number of datapoints, N(i) in the ith simulation/window
   // expBVE.at(i).at(j).at(k) = exp(-B(i)V(i,jk))*exp[-(B(i)-B(0))E(i,jk)]
  
   if (expBVE.size() != this->getNWindow() || (expBVxEx.size() > 0 && expBVxEx.size() != this->getNWindow())){
@@ -415,31 +415,31 @@ bool WHAM::iterateWHAM (){
   }
 
   //WHAM Iterations
-	time(&start);
+  time(&start);
   for (niter=1; niter< maxIter; niter++){
-		for (i=0; i< this->getNWindow(); i++){
-			FnextInv.at(i)=0.0;
-		}
-		
+    for (i=0; i< this->getNWindow(); i++){
+      FnextInv.at(i)=0.0;
+    }
+    
     for (j=0; j< this->getNWindow(); j++){ //For each simulation J
       for (k=0; k< expBVE.at(j).size(); k++){ //Foreach datapoint K in simulation J
-       	//Calculate (redundant) denominator once for each iteration
-				denomInv.at(j).at(k)=0.0;
+        //Calculate (redundant) denominator once for each iteration
+        denomInv.at(j).at(k)=0.0;
         for (l=0; l< this->getNWindow(); l++){ //Foreach simulation environment L
           //Calculate denom
           denomInv.at(j).at(k)+=nFlast.at(l)*expBVE.at(j).at(k).at(l);
         }
         denomInv.at(j).at(k)=1.0/denomInv.at(j).at(k);
-				for (i=0; i< this->getNWindow(); i++){ //For each F value I (simulation environment)
-					if (expBVxEx.size() == expBVE.size()){ //WHAM Extrapolation
-						FnextInv.at(i)+=expBVxEx.at(j).at(k).at(i)*denomInv.at(j).at(k);
-					} 
-					else{ //Traditional WHAM
-         		FnextInv.at(i)+=expBVE.at(j).at(k).at(i)*denomInv.at(j).at(k);
-					}
-				}
+        for (i=0; i< this->getNWindow(); i++){ //For each F value I (simulation environment)
+          if (expBVxEx.size() == expBVE.size()){ //WHAM Extrapolation
+            FnextInv.at(i)+=expBVxEx.at(j).at(k).at(i)*denomInv.at(j).at(k);
+          } 
+          else{ //Traditional WHAM
+            FnextInv.at(i)+=expBVE.at(j).at(k).at(i)*denomInv.at(j).at(k);
+          }
+        }
       }
-   	}
+    }
 
     //Check tolerance (note that tolerance is in f but F is in exp(Bf))
     convergedFlag=true;
@@ -461,7 +461,7 @@ bool WHAM::iterateWHAM (){
     }
 
     if (convergedFlag == true){
-			stop=difftime(time(0), start);
+      stop=difftime(time(0), start);
       std::cout << "# Iteration = " << niter << " , Time = " << stop << " seconds " << std::endl;
       for (i=0; i< this->getNWindow(); i++){
         //Final exp(B(i)*f(i))
@@ -599,28 +599,28 @@ bool WHAM::setTempRange(const std::string &tin){
 }
 
 void WHAM::getExpTempRange(const std::string &tin){
-	std::vector<double> s;
-	unsigned int i;
-	double currT;
-	double f;
+  std::vector<double> s;
+  unsigned int i;
+  double currT;
+  double f;
 
-	Misc::splitNum(tin, ":", s, false);
+  Misc::splitNum(tin, ":", s, false);
 
-	if (s.size() == 3){
-		f=exp(log(s.at(2)/s.at(1))/(static_cast<unsigned int>(s.at(0))-1));
-		currT=s.at(1);
-		for (i=0; i< s.at(0); i++){
-			std::cout << std::fixed;
-			std::cout << std::setprecision(4) << currT;
-			if (i<s.at(0)-1){
-				std::cout << ":";
-			}
-			else{
-				std::cout << std::endl;
-			}
-			currT=currT*f;
-		}
-	}
+  if (s.size() == 3){
+    f=exp(log(s.at(2)/s.at(1))/(static_cast<unsigned int>(s.at(0))-1));
+    currT=s.at(1);
+    for (i=0; i< s.at(0); i++){
+      std::cout << std::fixed;
+      std::cout << std::setprecision(4) << currT;
+      if (i<s.at(0)-1){
+        std::cout << ":";
+      }
+      else{
+        std::cout << std::endl;
+      }
+      currT=currT*f;
+    }
+  }
 }
 
 void WHAM::setFactor(const double &factorin){
@@ -737,17 +737,17 @@ void WHAM::setDenomInv(){
   unsigned int k;
   unsigned int l;
   
-	denomInv.clear();
+  denomInv.clear();
   denomInv.resize(this->getNWindow());
  
   for (j=0; j< this->getNWindow(); j++){ //For each simulation J
     denomInv.at(j).resize(expBVE.at(j).size());
     for (k=0; k< expBVE.at(j).size(); k++){ //Foreach datapoint K in simulation J
-			
+      
       denomInv.at(j).at(k)=0.0;
       for (l=0; l< this->getNWindow(); l++){ //Foreach simulation environment L
         //Calculate denom
-				denomInv.at(j).at(k)+=expBVE.at(j).size()*F.at(l)*expBVE.at(j).at(k).at(l);
+        denomInv.at(j).at(k)+=expBVE.at(j).size()*F.at(l)*expBVE.at(j).at(k).at(l);
       }
       denomInv.at(j).at(k)=1.0/denomInv.at(j).at(k);
     }
@@ -785,26 +785,26 @@ void WHAM::binOnTheFly(){
   double norm;
 
   norm=0.0;
-	Pun.clear();
+  Pun.clear();
 
-	//From Souaille & Roux, 2001
-	//
-	//				                                        
-	// Pun = 
-	//		                                                            N(j)
-	// SUM(j=1,....,S) SUM(k=1,...,N(j)----------------------------------------------------------------------- Pb(j)
-	//                                    SUM(l=1,...,S) N(l)*F(l)*exp(-B(l)V(l,jk))*exp[-(B(l)-B(0))E(l,jk)]
-	//
-	// But N(j)*Pb(j) = N(j)*[counts/N(j)] = Biased Histogram Counts, so
-	//
-	// Pun =
-	//                                                           Biased Histogram Counts
-	// SUM(j=1,....,S) SUM(k=1,...,N(j)-----------------------------------------------------------------------
-	//                                    SUM(l=1,...,S) N(l)*F(l)*exp(-B(l)V(l,jk))*exp[-(B(l)-B(0))E(l,jk)]
-	//
-	// Note that one needs to re-weight each biased histogram count(jk) by expBVx(j,jk) when doing WHAM extrapolation!
-	// i.e. only the Vextrapolation term of Vx = Vbias + Vextrapolation is needed, not Vbias
-	//
+  //From Souaille & Roux, 2001
+  //
+  //                                                
+  // Pun = 
+  //                                                                N(j)
+  // SUM(j=1,....,S) SUM(k=1,...,N(j)----------------------------------------------------------------------- Pb(j)
+  //                                    SUM(l=1,...,S) N(l)*F(l)*exp(-B(l)V(l,jk))*exp[-(B(l)-B(0))E(l,jk)]
+  //
+  // But N(j)*Pb(j) = N(j)*[counts/N(j)] = Biased Histogram Counts, so
+  //
+  // Pun =
+  //                                                           Biased Histogram Counts
+  // SUM(j=1,....,S) SUM(k=1,...,N(j)-----------------------------------------------------------------------
+  //                                    SUM(l=1,...,S) N(l)*F(l)*exp(-B(l)V(l,jk))*exp[-(B(l)-B(0))E(l,jk)]
+  //
+  // Note that one needs to re-weight each biased histogram count(jk) by expBVx(j,jk) when doing WHAM extrapolation!
+  // i.e. only the Vextrapolation term of Vx = Vbias + Vextrapolation is needed, not Vbias
+  //
 
   for (unsigned int j=0; j< this->getNWindow(); j++){
     for (unsigned int k=0; k < expBVE.at(j).size(); k++){
@@ -812,18 +812,18 @@ void WHAM::binOnTheFly(){
       b=rCoor->getBin(j, k);
       if (expBVxEx.size() != expBVE.size()){
         //Traditional WHAM
-				//The numerator is simply the biased histogram count
+        //The numerator is simply the biased histogram count
         if (Pun.find(b) != Pun.end()){
-					Pun[b]+=denomInv.at(j).at(k);
+          Pun[b]+=denomInv.at(j).at(k);
         }
         else{
-					Pun[b]=denomInv.at(j).at(k);
+          Pun[b]=denomInv.at(j).at(k);
         }
       }
       else{
         //WHAM Extrapolation
-				//The numerator is the biased histogram count re-weighted by expBVx for that datapoint
-				//i.e. only the Vextrpolation term of Vx = Vbias + Vextrapolation is needed, not Vbias
+        //The numerator is the biased histogram count re-weighted by expBVx for that datapoint
+        //i.e. only the Vextrpolation term of Vx = Vbias + Vextrapolation is needed, not Vbias
         if (Pun.find(b) != Pun.end()){
           Pun[b]+=(expBVxEx.at(j).at(k).at(j)/expBVE.at(j).at(k).at(j))*denomInv.at(j).at(k);
         }
@@ -848,55 +848,55 @@ void WHAM::printPMF(){
   std::map<unsigned int, double>::iterator it;
   std::vector<double> coor;
   unsigned int i, j, b;
-	unsigned int nbins;
+  unsigned int nbins;
   double T;
-	double last;
-	std::vector<unsigned int> bins;
-	std::vector<double> s;
-	
-	last=std::numeric_limits<double>::min();
+  double last;
+  std::vector<unsigned int> bins;
+  std::vector<double> s;
+  
+  last=std::numeric_limits<double>::min();
   T=1.0/(B0*kB);
 
-	bins=rCoor->getBins();
-	nbins=1;
-	for (i=0; i< bins.size(); i++){
-		nbins*=bins.at(i);
-	}
-
-	rCoor->getHisto().resize(nbins);
-  for (b=0; b< nbins; b++){
-		rCoor->getHisto().at(b).setInx(b);
-		rCoor->getHisto().at(b).setLabel(rCoor->getBinCoor(b));
+  bins=rCoor->getBins();
+  nbins=1;
+  for (i=0; i< bins.size(); i++){
+    nbins*=bins.at(i);
   }
 
-	//Sort based on the label, not the index
+  rCoor->getHisto().resize(nbins);
+  for (b=0; b< nbins; b++){
+    rCoor->getHisto().at(b).setInx(b);
+    rCoor->getHisto().at(b).setLabel(rCoor->getBinCoor(b));
+  }
+
+  //Sort based on the label, not the index
   std::sort(rCoor->getHisto().begin(), rCoor->getHisto().end(), Histogram::sortBinLabel);
 
-	for (i=0; i< nbins; i++){
-		b=rCoor->getHisto().at(i).getInx();
-		coor=rCoor->getHisto().at(i).getLabel();
-		if ((it=Pun.find(b)) != Pun.end()){
-			if (last != coor.at(0) && coor.size() > 1 ){
-				std::cout << std::endl;
-				last=coor.at(0);
-			}
-    	for (j=0; j< coor.size(); j++){
-      	std::cout << coor.at(j) << "   ";
-    	}
-    	std::cout << -kB*T*log(it->second) << "   ";
-    	std::cout << it->second << std::endl;
-		}
-		else{
-			//Zero probability bins
-    	if (last != coor.at(0) && coor.size() > 1){
-      	std::cout << std::endl;
-      	last=coor.at(0);
-    	}
-    	for (j=0; j< coor.size(); j++){
-      	std::cout << coor.at(j) << "   ";
-    	}
-    	std::cout << "NaN   ";
-    	std::cout << "0.0" << std::endl;
-		}
-	}
+  for (i=0; i< nbins; i++){
+    b=rCoor->getHisto().at(i).getInx();
+    coor=rCoor->getHisto().at(i).getLabel();
+    if ((it=Pun.find(b)) != Pun.end()){
+      if (last != coor.at(0) && coor.size() > 1 ){
+        std::cout << std::endl;
+        last=coor.at(0);
+      }
+      for (j=0; j< coor.size(); j++){
+        std::cout << coor.at(j) << "   ";
+      }
+      std::cout << -kB*T*log(it->second) << "   ";
+      std::cout << it->second << std::endl;
+    }
+    else{
+      //Zero probability bins
+      if (last != coor.at(0) && coor.size() > 1){
+        std::cout << std::endl;
+        last=coor.at(0);
+      }
+      for (j=0; j< coor.size(); j++){
+        std::cout << coor.at(j) << "   ";
+      }
+      std::cout << "NaN   ";
+      std::cout << "0.0" << std::endl;
+    }
+  }
 }

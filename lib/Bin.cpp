@@ -21,39 +21,39 @@ along with MoleTools.  If not, see <http://www.gnu.org/licenses/>.
 #include "Bin.hpp"
 
 Bin::Bin (){
-	n=0;
-	inx=0;
-	label.clear();
+  n=0;
+  inx=0;
+  label.clear();
 }
 
 void Bin::setN (const unsigned int &nin){
-	n=nin;
+  n=nin;
 }
 
 void Bin::setInx (const unsigned int &inxin){
-	inx=inxin;
+  inx=inxin;
 }
 
 void Bin::setLabel (const std::vector<double> &labelin){
-	label=labelin;
+  label=labelin;
 }
 
 unsigned int Bin::getN (){
-	return n;
+  return n;
 }
 
 unsigned int Bin::getInx (){
-	return inx;
+  return inx;
 }
 
 std::vector<double> Bin::getLabel (){
-	return label;
+  return label;
 }
 
 std::vector<double>& Bin::getLabelVec (){
-	return label;
+  return label;
 }
 
 const std::vector<double>& Bin::getLabelVec () const{
-	return label;
+  return label;
 }

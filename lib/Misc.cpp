@@ -6,7 +6,7 @@ void Misc::splitStr (const std::string &str, const std::string &delim, std::vect
   size_t p0=0;
   size_t p1=std::string::npos;
   size_t plast=std::string::npos;
-	out.clear();
+  out.clear();
 
   //"repeat" = true means that a blank string is added when there are
   //back-to-back delimiters. Otherwise, repeat=false ignores back-to-back delimiters.
@@ -40,8 +40,8 @@ void Misc::splitStr (const std::string &str, const std::string &delim, std::vect
 
 template <class SplitVec>
 void Misc::splitNum (const std::string &str, const std::string &delim, std::vector<SplitVec> &out, const bool repeat){
-	out.clear();
-	out.reserve(500); //Still need resizing but reduces moving of data in memory
+  out.clear();
+  out.reserve(500); //Still need resizing but reduces moving of data in memory
   size_t p0=0;
   size_t p1=std::string::npos;
   size_t plast=std::string::npos;
@@ -192,32 +192,32 @@ void Misc::toupper (std::string &str){
 }
 
 int Misc::atoi (std::string &str, const unsigned int offset){
-	int val;
-	const char *a;
-	val=0;
+  int val;
+  const char *a;
+  val=0;
 
-	if (Misc::isalpha(str.substr(offset, 1))){
-		a=str.substr(offset,1).c_str();
-		val=static_cast<int>(a[0]-'A')+1; //A = 1, B = 2, etc
-	}
-	return val;
+  if (Misc::isalpha(str.substr(offset, 1))){
+    a=str.substr(offset,1).c_str();
+    val=static_cast<int>(a[0]-'A')+1; //A = 1, B = 2, etc
+  }
+  return val;
 }
 
 double Misc::hypot (const double &a, const double &b){
-	if (a !=0){
-		return a*sqrt(1+(b/a)*(b/a));
-	}
-	else if (b !=0){
-		return b*sqrt(1+(a/b)*(a/b));
-	}
-	else{
-		return 0.0;
-	}
+  if (a !=0){
+    return a*sqrt(1+(b/a)*(b/a));
+  }
+  else if (b !=0){
+    return b*sqrt(1+(a/b)*(a/b));
+  }
+  else{
+    return 0.0;
+  }
 }
 
 template <class First, class Second>
 bool Misc::sortPairFirst(const std::pair<First, Second> &a, const std::pair<First, Second> &b){
-	return (a.first < b.first);
+  return (a.first < b.first);
 }
 
 template bool Misc::sortPairFirst<double, std::string>(const std::pair<double, std::string> &a, const std::pair<double, std::string> &b);
@@ -231,7 +231,7 @@ template bool Misc::sortPairSecond<int, int>(const std::pair<int, int> &a, const
 
 template <class First, class Second>
 bool Misc::findUniqueFirst(const std::pair<First, Second> &a, const std::pair<First, Second> &b){
-	return (a.first == b.first);
+  return (a.first == b.first);
 }
 
 template bool Misc::findUniqueFirst<int, int>(const std::pair<int, int> &a, const std::pair<int, int> &b);
@@ -239,7 +239,7 @@ template bool Misc::findUniqueFirst<int, int>(const std::pair<int, int> &a, cons
 
 template <class First, class Second>
 bool Misc::findUniqueSecond(const std::pair<First, Second> &a, const std::pair<First, Second> &b){
-	return (a.second == b.second);
+  return (a.second == b.second);
 }
 
 template bool Misc::findUniqueSecond(const std::pair<int, int> &a, const std::pair<int, int> &b);
