@@ -1,5 +1,7 @@
-// Sean M. Law
+//Sean M. Law
 //Aaron T. Frank
+//Logan S. Ahlstrom
+//Afra Panahi
     
 /*
 This file is part of MoleTools.
