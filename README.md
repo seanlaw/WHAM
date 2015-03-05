@@ -28,5 +28,6 @@ Please send any comments, bug reports, and suggestions to
 
 If you use this code, please cite:
 
-Law S. M., L. S. Ahlstrom, A. Panahi, C. L. Brooks III. <b>Hamiltonian Mapping Revisited: Calibrating Minimalist Models to Capture Molecular Recognition by Intrinsically Disordered Proteins</b>, 2014, <i>J. Phys. Chem. Lett.</i> 5(19):3441-3444
+Law S. M., L. S. Ahlstrom, A. Panahi, C. L. Brooks III. <b>Hamiltonian Mapping Revisited: Calibrating Minimalist Models to Capture Molecular Recognition by Intrinsically Disordered Proteins</b>, 2014, <i>J. Phys. Chem. Lett.</i> 5(19):3441-3444.
+
 [http://pubs.acs.org/doi/abs/10.1021/jz501811k]
