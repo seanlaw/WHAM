@@ -11,7 +11,7 @@ We have implemented a Weighted Histogram Analysis Method (WHAM) that is:
 2. Uses energies as input which avoids false assumptions (i.e., K vs. K/2 force constants)
 3. Written in C++ and is both speed and memory efficient
 4. Does <b>not</b> require binning (i.e., binless) and is, therefore, theoretically more accurate than all other binning-based methods
-5. Can generate N-dimensional potentials-of-mean-force (PMFs) using sparse matrices
+5. Can generate <b>N-dimensional</b> potentials-of-mean-force (PMFs) using sparse matrices
 
 #Installation
 
