@@ -3,10 +3,10 @@
 We have implemented a Weighted Histogram Analysis Method (WHAM) that is:
 
 1. <b>Generalized</b> to handle data generated from:
-    *  N-dimensional Umbrella Sampling (US)
+    *  <b>N-dimensional</b> Umbrella Sampling (US)
     *  Temperature Replica Exchange (T-REX)
-    *  N-dimensional Hamiltonian Replica Exchange (H-REX)
-    *  N-dimensional Hamiltonian Mapping (i.e., Hamiltonian re-weighting)
+    *  <b>N-dimensional</b> Hamiltonian Replica Exchange (H-REX)
+    *  <b>N-dimensional</b> Hamiltonian Mapping (i.e., Hamiltonian re-weighting)
     *  A combination of any of the above methods
 2. Uses energies as input which avoids false assumptions (i.e., K vs. K/2 force constants)
 3. Written in C++ and is both speed and memory efficient
