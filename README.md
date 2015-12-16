@@ -45,4 +45,4 @@ Law S. M., L. S. Ahlstrom, A. Panahi, C. L. Brooks III. <b>Hamiltonian Mapping R
 
 # Acknowledgements
 
-This work greatly benefited from valuable scientific discussions with Dr. [Michael Feig](http://feig.bch.msu.edu) and Dr. [Bing Zhang](https://www.linkedin.com/pub/bin-zhang/70/410/50b)
+This work greatly benefited from valuable scientific discussions with Dr. [Michael Feig](http://feig.bch.msu.edu) and Dr. [Bin Zhang](https://www.linkedin.com/pub/bin-zhang/70/410/50b)
