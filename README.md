@@ -16,7 +16,7 @@ We have implemented a Weighted Histogram Analysis Method (WHAM) that is:
 #Installation
 
     make clean
-    make install
+    make
 
 The executable can be found in /path/to/WHAM/bin/wham
 
