@@ -13,14 +13,14 @@ We have implemented a Weighted Histogram Analysis Method (WHAM) that is:
 4. Does <b>not</b> require binning (i.e., binless) and is, therefore, theoretically more accurate than all other binning-based methods
 5. Can generate <b>N-dimensional</b> potentials-of-mean-force (PMFs) using sparse matrices
 
-#Installation
+# Installation
 
     make clean
     make
 
 The executable can be found in /path/to/WHAM/bin/wham
 
-#Usage
+# Usage
 
     Usage:   wham [-options] <metadatafile>
     Options: [-bins rcoor1[:rcoor2[:rcoor3]]]
@@ -29,7 +29,7 @@ The executable can be found in /path/to/WHAM/bin/wham
              [-exp n:T1:T2]
              [-fguess file | -fval file]
 
-#Bugs and Comments
+# Bugs and Comments
 
 Please send any comments, bug reports, and suggestions to 
     
