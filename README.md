@@ -29,6 +29,10 @@ The executable can be found in /path/to/WHAM/bin/wham
              [-exp n:T1:T2]
              [-fguess file | -fval file]
 
+# Documentation
+
+Please see the [documentation](https://github.com/seanlaw/WHAM/blob/master/docs/WHAM_Documentation.docx) and a more thorough explanation of the WHAM inputs in our [wiki](https://github.com/seanlaw/WHAM/wiki)
+
 # Bugs and Comments
 
 Please send any comments, bug reports, and suggestions to 
