@@ -33,11 +33,9 @@ The executable can be found in /path/to/WHAM/bin/wham
 
 Please see the [documentation](https://github.com/seanlaw/WHAM/blob/master/docs/WHAM_Documentation.docx) and a more thorough explanation of the WHAM inputs in our [wiki](https://github.com/seanlaw/WHAM/wiki)
 
-# Bugs and Comments
+# Getting Help
 
-Please send any comments, bug reports, and suggestions to 
-    
-    Sean M. Law, seanmylaw@gmail.com
+First, please check the [issues on github](https://github.com/seanlaw/wham/issues) to see if your question has already been answered there. If no solution is available there feel free to open a new issue and the authors will attempt to respond in a reasonably timely fashion.
     
 # Reference
 
